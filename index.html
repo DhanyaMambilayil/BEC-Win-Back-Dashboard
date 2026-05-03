@@ -274,7 +274,7 @@
 
     <!-- HERO -->
     <div class="mech-hero">
-      <div class="mech-hero-eyebrow">May Contest 2025</div>
+      <div class="mech-hero-eyebrow">May Contest 2026</div>
       <div class="mech-hero-title">Win Back Momentum</div>
       <div class="mech-hero-tagline">Win the Day. Own the Month.</div>
       <div class="mech-hero-desc">
@@ -588,7 +588,7 @@ function renderScorecards() {
             <div class="scorecard-leader-score" style="color:${scoreColor(ls)}">${fmt(ls)}</div>
           </div>
         </div>
-        <div class="scorecard-avg">${d.branches.length} branches · ${d.branches.filter(b=>b.score>=2).length} at max score</div>
+        <div class="scorecard-avg">${d.count} branches · ${d.max2} at max score</div>
       </div>`;
     }).join('');
   });
