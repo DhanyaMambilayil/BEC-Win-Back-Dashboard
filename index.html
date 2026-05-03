@@ -624,7 +624,9 @@ function renderAllTable() {
     const avpct = b.avg.toFixed(1);
     const badge = i < 5 ? BADGES[i]+' ' : '';
     const prize = i < 5 ? `<span style="color:var(--gold);font-size:0.75rem;font-weight:700"> ${PRIZES[i]}</span>` : '';
-    const status = b.score>=2?'🟢 Excellent':b.score===1?'🔵 Good':b.score===0?'🟡 On Track':'🔴 Below Target';
+    const globalRank = sortedBranches().findIndex(x => x.branch === b.branch);
+    const total = state.branches.length;
+    const status = globalRank < 10 ? '🟢 Excellent' : globalRank < Math.round(total * 0.4) ? '🔵 Good' : globalRank < Math.round(total * 0.7) ? '🟡 On Track' : '🔴 Below Target';
     return `<tr data-area="${b.area}" data-name="${b.branch.toLowerCase()}">
       <td>${badge}${i+1}${prize}</td>
       <td>${b.branch}</td>
