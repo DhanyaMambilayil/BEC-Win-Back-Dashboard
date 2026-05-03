@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Win Back Momentum — Branch Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD166;
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d47;
+    --text: #e8edf5;
+    --muted: #6b7fa0;
+    --green: #06d6a0;
+    --red: #ef4565;
+    --abb: #FF6B6B;
+    --fah: #4ECDC4;
+    --far: #A78BFA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1a2a4a 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 18px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 3px; color: var(--gold); text-shadow: 0 0 30px rgba(255,209,102,0.4); }
+  .header-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .contest-badge { background: var(--gold); color: #0a0e1a; border-radius: 8px; padding: 6px 16px; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; }
+
+  /* TOP SCORE BANNER */
+  .top-score-banner {
+    background: linear-gradient(90deg, rgba(255,209,102,0.12) 0%, rgba(255,209,102,0.02) 100%);
+    border-bottom: 1px solid rgba(255,209,102,0.2);
+    padding: 10px 32px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .tsb-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2px; }
+  .tsb-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--gold); line-height:1; }
+  .tsb-div { width: 1px; height: 36px; background: var(--border); flex-shrink:0; }
+  .tsb-winners { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .winner-chip { display: flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; }
+  .winner-chip.w1 { border-color: #FFD700; }
+  .winner-chip.w2 { border-color: #C0C0C0; }
+  .winner-chip.w3 { border-color: #CD7F32; }
+  .winner-chip.w4 { border-color: #5ba4cf; }
+  .winner-chip.w5 { border-color: #7ec8e3; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; padding: 20px 32px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tab { padding: 10px 22px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.82rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; border: 1px solid transparent; border-bottom: none; transition: all 0.2s; color: var(--muted); white-space: nowrap; }
+  .tab:hover { color: var(--text); background: var(--surface); }
+  .tab.active { background: var(--surface); color: var(--gold); border-color: var(--border); border-bottom-color: var(--surface); }
+
+  .content { padding: 28px 32px; display: none; }
+  .content.active { display: block; }
+
+  /* AREA SCORECARDS */
+  .scorecard-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .scorecard { background: var(--surface); border-radius: 12px; padding: 20px 22px; border: 1px solid var(--border); transition: border-color 0.2s; }
+  .scorecard:hover { border-color: var(--gold); }
+  .scorecard-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .scorecard-area { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 2px; }
+  .scorecard.abb .scorecard-area { color: var(--abb); }
+  .scorecard.fah .scorecard-area { color: var(--fah); }
+  .scorecard.far .scorecard-area { color: var(--far); }
+  .scorecard-total-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .scorecard-total { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--text); line-height: 1; }
+  .scorecard-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .scorecard-leader-row { display: flex; align-items: center; justify-content: space-between; }
+  .scorecard-leader-lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .scorecard-leader-name { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .scorecard-leader-score { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; }
+  .scorecard-avg { font-size: 0.72rem; color: var(--muted); margin-top: 8px; }
+
+  /* LEADERBOARD */
+  .leaderboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .lb-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 2px; color: var(--gold); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .lb-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; margin-bottom: 4px; transition: background 0.15s; border: 1px solid transparent; }
+  .lb-row:hover { background: var(--surface2); border-color: var(--border); }
+  .lb-row.winner { background: linear-gradient(90deg, rgba(255,209,102,0.07) 0%, transparent 100%); }
+  .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; width: 32px; text-align: center; color: var(--muted); flex-shrink:0; }
+  .lb-name { flex: 1; font-size: 0.86rem; font-weight: 500; }
+  .lb-area { font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; letter-spacing: 1px; flex-shrink:0; }
+  .lb-area.abb { background: rgba(255,107,107,0.15); color: var(--abb); }
+  .lb-area.fah { background: rgba(78,205,196,0.15); color: var(--fah); }
+  .lb-area.far { background: rgba(167,139,250,0.15); color: var(--far); }
+  .lb-score { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; width: 38px; text-align: right; flex-shrink:0; }
+  .lb-score.pos { color: var(--green); }
+  .lb-score.neu { color: var(--muted); }
+  .lb-score.neg { color: var(--red); }
+  .lb-bar-wrap { width: 70px; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; flex-shrink:0; }
+  .lb-bar { height: 100%; border-radius: 3px; }
+  .lb-bar.pos { background: var(--green); }
+  .lb-bar.neg { background: var(--red); }
+  .lb-bar.neu { background: var(--muted); }
+
+  /* EDIT PANEL */
+
+  /* ALL BRANCHES TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+  th { background: var(--surface2); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; padding: 10px 14px; text-align: left; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: var(--surface2); }
+  .score-cell { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+  .search-bar { margin-bottom: 14px; }
+  .search-bar input { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 16px; font-size: 0.88rem; }
+  .search-bar input:focus { outline: none; border-color: var(--gold); }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; }
+  .filter-btn.all.active { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.abb.active { border-color: var(--abb); color: var(--abb); }
+  .filter-btn.fah.active { border-color: var(--fah); color: var(--fah); }
+  .filter-btn.far.active { border-color: var(--far); color: var(--far); }
+  .tag { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; letter-spacing: 0.5px; }
+  .tag.abb { background: rgba(255,107,107,0.15); color: var(--abb); }
+  .tag.fah { background: rgba(78,205,196,0.15); color: var(--fah); }
+  .tag.far { background: rgba(167,139,250,0.15); color: var(--far); }
+
+  /* ── SCORE MECHANICS ── */
+  .mech-wrap { max-width: 960px; }
+
+  .mech-hero {
+    background: linear-gradient(135deg, #0d1b2a, #1a2a4a);
+    border: 1px solid rgba(255,209,102,0.3); border-radius: 16px;
+    padding: 36px 32px; margin-bottom: 28px; text-align: center;
+  }
+  .mech-hero-eyebrow { font-size: 0.72rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .mech-hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 3px; color: var(--gold); line-height: 1.1; }
+  .mech-hero-tagline { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--text); margin-top: 4px; opacity: 0.7; }
+  .mech-hero-desc { color: var(--muted); font-size: 0.88rem; margin-top: 14px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+  .corridor-flags { display: flex; justify-content: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .corridor-flag { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; font-size: 0.82rem; font-weight: 600; }
+
+  /* POINTS COMPONENTS */
+  .mech-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--gold); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .points-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 28px; }
+
+  .pts-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+  .pts-card-head { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); }
+  .pts-card-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .pts-card-title { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 2px; color: var(--text); }
+  .pts-card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .pts-tier { display: flex; align-items: center; justify-content: space-between; padding: 9px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .pts-tier:last-child { border-bottom: none; }
+  .pts-tier-label { font-size: 0.8rem; color: var(--text); }
+  .pts-tier-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; }
+  .pts-tier-val.p2 { color: #06d6a0; }
+  .pts-tier-val.p1 { color: #4cc9f0; }
+  .pts-tier-val.p0 { color: var(--muted); }
+  .pts-tier-val.pn { color: var(--red); }
+  .pts-tier-val.big { color: var(--gold); font-size: 1.5rem; }
+
+  /* PRIZES */
+  .prizes-section { margin-bottom: 28px; }
+  .prizes-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .prize-card {
+    flex: 1; min-width: 140px; border-radius: 12px; padding: 22px 16px;
+    text-align: center; border: 1px solid var(--border); background: var(--surface2);
+    position: relative; overflow: hidden;
+  }
+  .prize-card::before { content: ''; position: absolute; inset: 0; opacity: 0.04; background: radial-gradient(circle at top, white, transparent 70%); pointer-events: none; }
+  .prize-card.r1 { border-color: #FFD700; background: linear-gradient(160deg, rgba(255,215,0,0.08), var(--surface2) 60%); }
+  .prize-card.r2 { border-color: #C0C0C0; background: linear-gradient(160deg, rgba(192,192,192,0.06), var(--surface2) 60%); }
+  .prize-card.r3 { border-color: #CD7F32; background: linear-gradient(160deg, rgba(205,127,50,0.06), var(--surface2) 60%); }
+  .prize-card.r4 { border-color: #5ba4cf; background: linear-gradient(160deg, rgba(91,164,207,0.06), var(--surface2) 60%); }
+  .prize-card.r5 { border-color: #7ec8e3; background: linear-gradient(160deg, rgba(126,200,227,0.06), var(--surface2) 60%); }
+  .prize-badge { font-size: 2.4rem; margin-bottom: 6px; }
+  .prize-rank { font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 2px; color: var(--muted); }
+  .prize-amount { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; margin-top: 6px; }
+  .prize-card.r1 .prize-amount { color: #FFD700; }
+  .prize-card.r2 .prize-amount { color: #C0C0C0; }
+  .prize-card.r3 .prize-amount { color: #CD7F32; }
+  .prize-card.r4 .prize-amount { color: #5ba4cf; }
+  .prize-card.r5 .prize-amount { color: #7ec8e3; }
+  .prize-label { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  /* FOCUS AREAS */
+  .focus-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .focus-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; display: flex; align-items: flex-start; gap: 12px; }
+  .focus-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+  .focus-title { font-weight: 700; font-size: 0.85rem; color: var(--text); }
+  .focus-desc { font-size: 0.76rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 28px; right: 28px; background: var(--green); color: #0a0e1a; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 999; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    .scorecard-row { grid-template-columns: 1fr; }
+    .leaderboard-grid { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+    .tabs { padding: 12px 16px 0; }
+    .header { padding: 14px 16px; flex-wrap: wrap; gap: 10px; }
+    .header-title { font-size: 1.6rem; }
+    .top-score-banner { padding: 10px 16px; }
+    .prizes-row { flex-direction: column; }
+    .points-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .points-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-title">🏆 Win Back Momentum</div>
+    <div class="header-sub">May Contest · Win the Day. Own the Month.</div>
+  </div>
+  <div class="header-right">
+    <div class="contest-badge">DAY <span id="contestDayDisplay">1</span></div>
+  </div>
+</div>
+
+<!-- TOP SCORE BANNER -->
+<div class="top-score-banner" id="topScoreBanner"></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" onclick="switchTab('all')">📋 All Branches</div>
+  <div class="tab" onclick="switchTab('mechanics')">⚙️ Score Mechanics</div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div class="content active" id="tab-dashboard">
+  <div class="scorecard-row" id="areaScorecards"></div>
+  <div class="leaderboard-grid">
+    <div>
+      <div class="lb-section-title">🏆 Top 10 Branches</div>
+      <div id="top10"></div>
+    </div>
+    <div>
+      <div class="lb-section-title">📋 Remaining Branches</div>
+      <div id="remaining" style="max-height:600px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ALL BRANCHES ── -->
+<div class="content" id="tab-all">
+  <div class="search-bar"><input type="text" id="searchInput" placeholder="🔍 Search branch..." oninput="filterTable()"></div>
+  <div class="filter-row">
+    <button class="filter-btn all active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn abb" onclick="setFilter('ABB',this)">ABB</button>
+    <button class="filter-btn fah" onclick="setFilter('FAH',this)">FAH</button>
+    <button class="filter-btn far" onclick="setFilter('FAR',this)">FAR</button>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>Rank</th><th>Branch</th><th>Area</th><th>Score</th><th>Avg %</th><th>Status</th></tr></thead>
+    <tbody id="allTbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ── SCORE MECHANICS ── -->
+<div class="content" id="tab-mechanics">
+  <div class="mech-wrap">
+
+    <!-- HERO -->
+    <div class="mech-hero">
+      <div class="mech-hero-eyebrow">May Contest 2025</div>
+      <div class="mech-hero-title">Win Back Momentum</div>
+      <div class="mech-hero-tagline">Win the Day. Own the Month.</div>
+      <div class="mech-hero-desc">
+        This campaign drives a minimum <strong style="color:var(--gold)">10% increase</strong> in retail remittance transactions in May, with a strong focus on growing our major corridors through customer win-back. Top 5 branches with the highest cumulative points win prizes at month end.
+      </div>
+      <div class="corridor-flags">
+        <div class="corridor-flag">🇮🇳 India (INR)</div>
+        <div class="corridor-flag">🇪🇬 Egypt (EGP)</div>
+        <div class="corridor-flag">🇧🇩 Bangladesh (BDT)</div>
+      </div>
+    </div>
+
+    <!-- PRIZES -->
+    <div class="prizes-section">
+      <div class="mech-section-title">🏆 Winner Prizes</div>
+      <div class="prizes-row">
+        <div class="prize-card r1"><div class="prize-badge">🥇</div><div class="prize-rank">1st Place</div><div class="prize-amount">KD 150</div><div class="prize-label">Champion</div></div>
+        <div class="prize-card r2"><div class="prize-badge">🥈</div><div class="prize-rank">2nd Place</div><div class="prize-amount">KD 125</div><div class="prize-label">Runner Up</div></div>
+        <div class="prize-card r3"><div class="prize-badge">🥉</div><div class="prize-rank">3rd Place</div><div class="prize-amount">KD 100</div><div class="prize-label">3rd Prize</div></div>
+        <div class="prize-card r4"><div class="prize-badge">🎗️</div><div class="prize-rank">4th Place</div><div class="prize-amount">KD 75</div><div class="prize-label">4th Prize</div></div>
+        <div class="prize-card r5"><div class="prize-badge">🎀</div><div class="prize-rank">5th Place</div><div class="prize-amount">KD 50</div><div class="prize-label">5th Prize</div></div>
+      </div>
+    </div>
+
+    <!-- POINTS BREAKDOWN -->
+    <div class="mech-section-title">📌 How Points Are Earned</div>
+    <div class="points-grid">
+
+      <!-- DAILY -->
+      <div class="pts-card">
+        <div class="pts-card-head">
+          <div class="pts-card-icon">📅</div>
+          <div class="pts-card-title">Daily Branch Target</div>
+          <div class="pts-card-sub">Achievement vs daily target</div>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">120%+</span>
+          <span class="pts-tier-val p2">+2 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">100 – 119%</span>
+          <span class="pts-tier-val p1">+1 pt</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">80 – 99%</span>
+          <span class="pts-tier-val p0">0 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">Below 80%</span>
+          <span class="pts-tier-val pn">−1 pt</span>
+        </div>
+      </div>
+
+      <!-- WEEKLY CORRIDORS -->
+      <div class="pts-card">
+        <div class="pts-card-head">
+          <div class="pts-card-icon">📆</div>
+          <div class="pts-card-title">Weekly Corridors</div>
+          <div class="pts-card-sub">INR 🇮🇳 · EGP 🇪🇬 · BDT 🇧🇩 — per corridor</div>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">120%+</span>
+          <span class="pts-tier-val big">+10 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">100 – 119%</span>
+          <span class="pts-tier-val p1">+5 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">Below 100%</span>
+          <span class="pts-tier-val p0">0 pts</span>
+        </div>
+      </div>
+
+      <!-- WIN-BACK -->
+      <div class="pts-card">
+        <div class="pts-card-head">
+          <div class="pts-card-icon">🔄</div>
+          <div class="pts-card-title">Customer Activation</div>
+          <div class="pts-card-sub">Win-back of inactive customers</div>
+        </div>
+        <div class="pts-tier" style="padding: 20px 18px; flex-direction: column; align-items: flex-start; gap: 6px;">
+          <span class="pts-tier-label" style="font-size:0.85rem;">Each inactive customer win-back</span>
+          <span class="pts-tier-val big">+1 pt each</span>
+        </div>
+      </div>
+
+      <!-- MONTHLY BONUS -->
+      <div class="pts-card">
+        <div class="pts-card-head">
+          <div class="pts-card-icon">📊</div>
+          <div class="pts-card-title">Monthly Performance Bonus</div>
+          <div class="pts-card-sub">End-of-month achievement</div>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">120%+</span>
+          <span class="pts-tier-val big">+40 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">110 – 119%</span>
+          <span class="pts-tier-val p2">+30 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">100 – 109%</span>
+          <span class="pts-tier-val p1">+20 pts</span>
+        </div>
+        <div class="pts-tier">
+          <span class="pts-tier-label">Below 100%</span>
+          <span class="pts-tier-val p0">0 pts</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOCUS AREAS -->
+    <div class="mech-section-title">💪 Key Focus Areas</div>
+    <div class="focus-grid">
+      <div class="focus-card"><div class="focus-icon">📈</div><div><div class="focus-title">Daily Transactions</div><div class="focus-desc">Hit or exceed your daily branch target every single day</div></div></div>
+      <div class="focus-card"><div class="focus-icon">🇮🇳</div><div><div class="focus-title">India Corridor</div><div class="focus-desc">Push INR weekly targets — max 10 pts per week</div></div></div>
+      <div class="focus-card"><div class="focus-icon">🇪🇬</div><div><div class="focus-title">Egypt Corridor</div><div class="focus-desc">Push EGP weekly targets — max 10 pts per week</div></div></div>
+      <div class="focus-card"><div class="focus-icon">🇧🇩</div><div><div class="focus-title">Bangladesh Corridor</div><div class="focus-desc">Push BDT weekly targets — max 10 pts per week</div></div></div>
+      <div class="focus-card"><div class="focus-icon">📞</div><div><div class="focus-title">Inactive Calling</div><div class="focus-desc">Maximize win-backs — every customer = +1 point</div></div></div>
+      <div class="focus-card"><div class="focus-icon">🎯</div><div><div class="focus-title">Month-End Push</div><div class="focus-desc">Reach 120%+ monthly achievement for +40 bonus points</div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Scores saved!</div>
+
+<script>
+const BADGES = ['🥇','🥈','🥉','🎗️','🎀'];
+const PRIZES = ['KD 150','KD 125','KD 100','KD 75','KD 50'];
+
+// ── REPLACE THIS WITH YOUR GOOGLE SHEET CSV PUBLISH URL ──
+// Google Sheet → File → Share → Publish to web → Sheet1 → CSV → Copy link
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzkUixrFwedq7wu5eAec11hMmL9R6038B1sK6ma6gHBjv3hrA9pFdZuw0VL9JfIg/pub?gid=1310562387&single=true&output=csv';
+
+let state = { contestDay: 1, branches: [] };
+
+// ── PARSE CSV ──
+// Required columns: branch, area, score, avg, day
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/"/g,''));
+  let maxDay = 1;
+  const branches = lines.slice(1).filter(l => l.trim()).map(line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c of line) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cols.push(cur.trim());
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (cols[i]||'').replace(/"/g,'').trim());
+    const score = parseInt(obj.score) || 0;
+    const avg   = parseFloat(obj.avg) || 0;
+    const day   = parseInt(obj.day)   || 1;
+    if (day > maxDay) maxDay = day;
+    return { branch: obj.branch, area: (obj.area||'').toUpperCase(), score, avg };
+  }).filter(b => b.branch && b.area);
+  return { contestDay: maxDay, branches };
+}
+
+function showLoading() {
+  const msg = '<div style="color:var(--muted);padding:24px;text-align:center;font-size:0.85rem">⏳ Loading live data…</div>';
+  ['areaScorecards','top10','remaining'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = msg;
+  });
+}
+
+function showError(msg) {
+  ['top10','remaining'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = `<div style="color:var(--red);padding:24px;text-align:center;font-size:0.85rem">⚠️ ${msg}</div>`;
+  });
+}
+
+async function loadData() {
+  if (CSV_URL === 'YOUR_GOOGLE_SHEET_CSV_URL_HERE') {
+    showError('Please set your Google Sheet CSV URL in the index.html file.');
+    return;
+  }
+  showLoading();
+  try {
+    const url = CSV_URL + (CSV_URL.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    if (!text || text.trim().length < 10) throw new Error('Empty data');
+    state = parseCSV(text);
+    render();
+  } catch(e) {
+    console.error(e);
+    showError('Could not load data. Make sure your Google Sheet is published as CSV and the URL is correct.');
+  }
+}
+
+// Auto-refresh every 5 minutes
+setInterval(loadData, 5 * 60 * 1000);
+
+function sc(s) { return s > 0 ? 'pos' : s < 0 ? 'neg' : 'neu'; }
+function fmt(s) { return (s > 0 ? '+' : '') + s; }
+function scoreColor(s) { return s > 0 ? 'var(--green)' : s < 0 ? 'var(--red)' : 'var(--muted)'; }
+function sortedBranches() { return [...state.branches].sort((a,b) => b.score - a.score || b.avg - a.avg); }
+function areaData(area) {
+  const br = state.branches.filter(b => b.area === area);
+  const total = br.reduce((t,b) => t + b.score, 0);
+  const avg = br.length ? total / br.length : 0;
+  const leader = [...br].sort((a,b) => b.score - a.score || b.avg - a.avg)[0];
+  return { total, avg, leader, count: br.length, max2: br.filter(b => b.score >= 2).length };
+}
+
+function render() {
+  document.getElementById('contestDayDisplay').textContent = state.contestDay;
+  renderBanner(); renderScorecards(); renderLeaderboard(); renderAllTable();
+}
+
+function renderBanner() {
+  const s = sortedBranches();
+  const topScore = s[0] ? s[0].score : 0;
+  const chips = s.slice(0,5).map((b,i) => `
+    <div class="winner-chip w${i+1}">
+      <span>${BADGES[i]}</span>
+      <span style="font-weight:700">${b.branch}</span>
+      <span class="tag ${b.area.toLowerCase()}">${b.area}</span>
+      <span style="color:var(--gold);font-size:0.72rem;font-weight:700">${PRIZES[i]}</span>
+    </div>`).join('');
+  document.getElementById('topScoreBanner').innerHTML = `
+    <div>
+      <div class="tsb-label">🏆 Top Score Today</div>
+      <div class="tsb-score">${fmt(topScore)}</div>
+    </div>
+    <div class="tsb-div"></div>
+    <div>
+      <div class="tsb-label" style="margin-bottom:6px">🎖️ Current Prize Standings</div>
+      <div class="tsb-winners">${chips}</div>
+    </div>`;
+}
+
+function renderScorecards() {
+  ['ABB','FAR','FAH'].forEach(area => {
+    const d = areaData(area);
+    const ls = d.leader ? d.leader.score : 0;
+    const container = document.getElementById('areaScorecards');
+    container.innerHTML = ['ABB','FAR','FAH'].map(a => {
+      const d = areaData(a);
+      const ls = d.leader ? d.leader.score : 0;
+      return `
+      <div class="scorecard ${a.toLowerCase()}">
+        <div class="scorecard-header">
+          <div>
+            <div class="scorecard-area">${a} Area</div>
+            <div class="scorecard-total-lbl">Total Score</div>
+            <div class="scorecard-total">${d.total}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="scorecard-total-lbl">Avg Score</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--text)">${d.avg.toFixed(2)}</div>
+          </div>
+        </div>
+        <div class="scorecard-divider"></div>
+        <div class="scorecard-leader-row">
+          <div>
+            <div class="scorecard-leader-lbl">🏅 Area Leader</div>
+            <div class="scorecard-leader-name">${d.leader ? d.leader.branch : '—'}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="scorecard-leader-lbl">Leader Score</div>
+            <div class="scorecard-leader-score" style="color:${scoreColor(ls)}">${fmt(ls)}</div>
+          </div>
+        </div>
+        <div class="scorecard-avg">${d.branches.length} branches · ${d.branches.filter(b=>b.score>=2).length} at max score</div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function renderLeaderboard() {
+  const s = sortedBranches();
+  const rowHtml = (b,i) => {
+    const cls = sc(b.score);
+    const barW = Math.round((Math.abs(b.score)/2)*100);
+    const rankEl = i < 5
+      ? `<span class="lb-rank" style="font-size:1.2rem">${BADGES[i]}</span>`
+      : `<span class="lb-rank">${i+1}</span>`;
+    const prizeEl = i < 5 ? `<span style="font-size:0.7rem;color:var(--gold);font-weight:700;flex-shrink:0">${PRIZES[i]}</span>` : '';
+    return `
+    <div class="lb-row ${i<5?'winner':''}">
+      ${rankEl}
+      <span class="lb-name">${b.branch}</span>
+      <span class="lb-area ${b.area.toLowerCase()}">${b.area}</span>
+      ${prizeEl}
+      <div class="lb-bar-wrap"><div class="lb-bar ${cls}" style="width:${barW}%"></div></div>
+      <span class="lb-score ${cls}">${fmt(b.score)}</span>
+    </div>`;
+  };
+  document.getElementById('top10').innerHTML = s.slice(0,10).map((b,i)=>rowHtml(b,i)).join('');
+  document.getElementById('remaining').innerHTML = s.slice(10).map((b,i)=>rowHtml(b,i+10)).join('');
+}
+
+function renderAllTable() {
+  const s = sortedBranches();
+  document.getElementById('allTbody').innerHTML = s.map((b,i) => {
+    const cls = sc(b.score);
+    const avpct = b.avg.toFixed(1);
+    const badge = i < 5 ? BADGES[i]+' ' : '';
+    const prize = i < 5 ? `<span style="color:var(--gold);font-size:0.75rem;font-weight:700"> ${PRIZES[i]}</span>` : '';
+    const status = b.score>=2?'🟢 Excellent':b.score===1?'🔵 Good':b.score===0?'🟡 On Track':'🔴 Below Target';
+    return `<tr data-area="${b.area}" data-name="${b.branch.toLowerCase()}">
+      <td>${badge}${i+1}${prize}</td>
+      <td>${b.branch}</td>
+      <td><span class="tag ${b.area.toLowerCase()}">${b.area}</span></td>
+      <td class="score-cell ${cls}">${fmt(b.score)}</td>
+      <td>${b.avg>=0?'+':''}${avpct}%</td>
+      <td style="font-size:0.8rem">${status}</td>
+    </tr>`;
+  }).join('');
+}
+
+
+
+
+let activeFilter = 'all';
+function setFilter(area, btn) {
+  activeFilter = area;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable();
+}
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('#allTbody tr').forEach(row => {
+    const matchArea = activeFilter==='all' || row.dataset.area===activeFilter;
+    const matchQ = (row.dataset.name||'').includes(q);
+    row.style.display = matchArea && matchQ ? '' : 'none';
+  });
+}
+
+function switchTab(name) {
+  const names = ['dashboard','all','mechanics'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.content').forEach(c=>c.classList.toggle('active',c.id==='tab-'+name));
+}
+
+// ── INIT — fetch live data on load ──
+loadData();
+</script>
+</body>
+</html>
