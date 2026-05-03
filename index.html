@@ -411,7 +411,7 @@ const PRIZES = ['KD 150','KD 125','KD 100','KD 75','KD 50'];
 
 // ── REPLACE THIS WITH YOUR GOOGLE SHEET CSV PUBLISH URL ──
 // Google Sheet → File → Share → Publish to web → Sheet1 → CSV → Copy link
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzkUixrFwedq7wu5eAec11hMmL9R6038B1sK6ma6gHBjv3hrA9pFdZuw0VL9JfIg/pub?gid=1310562387&single=true&output=csv';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTnwR7xE9iUUk-fFNtrQiSpFRvJvucp4QcPyE8ABJ7-rqXB9KHwBGp_PzXwiF922Lb0QqDObFDWI5Vy/pub?gid=1310562387&single=true&output=csv';
 
 let state = { contestDay: 1, branches: [] };
 
@@ -499,7 +499,7 @@ async function tryFetch(url) {
 
 async function loadData() {
   if (CSV_URL === 'YOUR_GOOGLE_SHEET_CSV_URL_HERE') {
-    showError('Please set your Google Sheet CSV URL in the index.html file.');
+    showError('https://docs.google.com/spreadsheets/d/e/2PACX-1vTnwR7xE9iUUk-fFNtrQiSpFRvJvucp4QcPyE8ABJ7-rqXB9KHwBGp_PzXwiF922Lb0QqDObFDWI5Vy/pub?gid=1310562387&single=true&output=csv');
     return;
   }
   showLoading();
