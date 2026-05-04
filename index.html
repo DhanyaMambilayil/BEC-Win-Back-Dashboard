@@ -557,11 +557,11 @@ function renderBanner() {
 }
 
 function renderScorecards() {
-  ['ABB','FAR','FAH'].forEach(area => {
+  ['ABB','FAR','FAH'].sort((a,b) => areaData(b).total - areaData(a).total || areaData(b).avg - areaData(a).avg).forEach(area => {
     const d = areaData(area);
     const ls = d.leader ? d.leader.score : 0;
     const container = document.getElementById('areaScorecards');
-    container.innerHTML = ['ABB','FAR','FAH'].map(a => {
+    container.innerHTML = ['ABB','FAR','FAH'].sort((a,b) => areaData(b).total - areaData(a).total || areaData(b).avg - areaData(a).avg).map(a => {
       const d = areaData(a);
       const ls = d.leader ? d.leader.score : 0;
       return `
