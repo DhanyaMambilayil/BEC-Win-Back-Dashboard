@@ -598,7 +598,8 @@ function renderLeaderboard() {
   const s = sortedBranches();
   const rowHtml = (b,i) => {
     const cls = sc(b.score);
-    const barW = Math.round((Math.abs(b.score)/2)*100);
+    const maxScore = Math.max(...sortedBranches().map(x => Math.abs(x.score)), 1);
+const barW = Math.round((Math.abs(b.score)/maxScore)*100);
     const rankEl = i < 5
       ? `<span class="lb-rank" style="font-size:1.2rem">${BADGES[i]}</span>`
       : `<span class="lb-rank">${i+1}</span>`;
